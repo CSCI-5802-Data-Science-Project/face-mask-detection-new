@@ -8,9 +8,6 @@ import torch
 from skvideo.io import FFmpegWriter, vreader
 import torchvision
 from torchvision.transforms import Compose, Resize, ToPILImage, ToTensor
-
-# from common.facedetector import FaceDetector
-# from train import MaskDetector
 import os
 import matplotlib.pyplot as plt
 import numpy as np
@@ -19,14 +16,11 @@ from torchvision import transforms
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 
 def plot_image_new(frame, img_tensor, annotation, xStart=None, yStart=None, block=True):
-    # img_tensor = torch.from_numpy(img_tensor)
     fig,ax = plt.subplots(1)
     img = img_tensor.cpu().data
 
     # Display the image
     ax.imshow( np.array( img_tensor.permute(1, 2, 0) ) )
-    # print(annotation)
-    # print(annotation["labels"])
     frameFlag = False
     boundingBoxes = []
 
@@ -73,26 +67,14 @@ def get_model_instance_segmentation(num_classes):
 @torch.no_grad()
 def tagVideo(modelpath, videopath, outputPath=None):
     """ detect if persons in video are wearing masks or not
-    """
-    # model = MaskDetector()
-    
+    """   
     model = get_model_instance_segmentation(3)
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     # model.load_state_dict(torch.load(modelpath, map_location=device), strict=False)
     model.load_state_dict(torch.load(modelpath, map_location=device))
     model = model.to(device)
     model.eval()
-    
-    # faceDetector = FaceDetector(
-    #     prototype='covid-mask-detector/face_detection_model/deploy.prototxt.txt',
-    #     model='covid-mask-detector/face_detection_model/res10_300x300_ssd_iter_140000.caffemodel',
-    # )
-    
-    # transformations = Compose([
-    #     ToPILImage(),
-    #     Resize((100, 100)),
-    #     ToTensor(),
-    # ])
+
     
     data_transform = transforms.Compose([
         ToPILImage(),
@@ -118,56 +100,8 @@ def tagVideo(modelpath, videopath, outputPath=None):
         if frame_count%30==0:
             frameTensor = data_transform(frame)
             frameTensor = torch.unsqueeze(frameTensor, 0).to(device)
-
             output = model(frameTensor)
-            boundingBoxes = plot_image_new(frame, frameTensor[0], output[0])
-            # faces = faceDetector.detect(frame)
-            # for face in faces:
-            #     xStart, yStart, width, height = face
-            #     xStart -= 100
-            #     yStart -= 100
-            #     width += 2*100
-            #     height += 2*100
-                
-            #     # clamp coordinates that are outside of the image
-            #     xStart, yStart = max(xStart, 0), max(yStart, 0)
-                
-            #     # predict mask label on extracted face
-            #     faceImg = frame[yStart:yStart+height, xStart:xStart+width]
-
-                
-            #     cv2.imwrite(os.path.join(outputDir, 'images', str(img_count)+'.png'), faceImg) 
-            #     img_count += 1
-
-            #     # faceImgTranspose = np.transpose(faceImg, (2,0,1))
-
-                
-            #     faceImgTensor = data_transform(faceImg)
-            #     # faceImgTensor = torch.from_numpy(faceImg)
-            #     # faceImgTensor = faceImgTensor.permute(2,0,1)
-            #     faceImgTensor = torch.unsqueeze(faceImgTensor, 0).to(device)
-
-            #     output = model(faceImgTensor)
-            #     boundingBoxes = plot_image_new(frame, faceImgTensor[0], output[0], xStart=xStart, yStart=yStart)
-
-            #     # _, predicted = torch.max(output.data, 1)
-                
-            #     # draw face frame
-            #     # cv2.rectangle(frame,
-            #     #               (xStart, yStart),
-            #     #               (xStart + width, yStart + height),
-            #     #               (126, 65, 64),
-            #     #               thickness=2)
-                
-            #     # # center text according to the face frame
-            #     # textSize = cv2.getTextSize(labels[predicted], font, 1, 2)[0]
-            #     # textX = xStart + width // 2 - textSize[0] // 2
-                
-            #     # # draw prediction label
-            #     # cv2.putText(frame,
-            #     #             labels[predicted],
-            #     #             (textX, yStart-20),
-            #     #             font, 1, labelColor[predicted], 2)
+            boundingBoxes = plot_image_new(frame, frameTensor[0], output[0])            
             
         if len(boundingBoxes)>0:
             for bb in boundingBoxes:
