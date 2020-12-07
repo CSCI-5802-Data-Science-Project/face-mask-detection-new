@@ -3,3 +3,5 @@ saves/
 dataset/
 .DS_Store
 sample_images/
+.vscode/
+sample_videos*/
