@@ -1,5 +1,3 @@
-""" Detect people wearing masks in videos
-"""
 from pathlib import Path
 
 import click
@@ -29,20 +27,8 @@ def plot_image_new(frame, img_tensor, annotation, xStart=None, yStart=None, bloc
         print("box",box)
         xmin, ymin, xmax, ymax = box
         # Create a Rectangle patch
-        if label==2 or label == 3:
-            # rect = patches.Rectangle((xmin,ymin),(xmax-xmin),(ymax-ymin),linewidth=1,edgecolor='b',facecolor='none')
-            # cv2.rectangle(frame,
-            #               (xmin, ymin),
-            #               (xmax, ymax),
-            #               (126, 65, 64),
-            #               thickness=2)
-            boundingBoxes.append((xmin, ymin, xmax, ymax))
-        # else:
-        #     rect = patches.Rectangle((xmin,ymin),(xmax-xmin),(ymax-ymin),linewidth=1,edgecolor='r',facecolor='none')
-        # Add the patch to the Axes
-    #     ax.add_patch(rect)
-    #     ax.axis("off")
-    # plt.show(block=block)
+        if label==2 or label == 3:            
+            boundingBoxes.append((xmin, ymin, xmax, ymax))        
     return boundingBoxes
 
 def get_model_instance_segmentation(num_classes):
